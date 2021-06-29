@@ -50,7 +50,7 @@ def load_image(path):
 
     post_process(img, outputs, 0.5)
     cv.imshow('window',  img)
-    #cv.displayOverlay('window', f("Forward propagation time={t:.3}"))
+    cv.displayOverlay('window', f'forward propagation time={t:.3}')
     cv.waitKey(0)
 
 def post_process(img, outputs, conf):
@@ -88,7 +88,7 @@ def trackbar(x):
     conf = x/100
     img = img0.copy()
     post_process(img, outputs, conf)
-    #cv.displayOverlay('window', f('confidence level={conf}'))
+    cv.displayOverlay('window', f'confidence level={conf}')
     cv.imshow('window', img)
 
 cv.namedWindow('window')
