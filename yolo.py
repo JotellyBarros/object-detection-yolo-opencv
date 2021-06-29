@@ -10,11 +10,11 @@ import time
 
 print(cv2.__version__)
 
-INPUT_FILE='images/cerveja.jpg'
+INPUT_FILE='images/dog.jpg'
 OUTPUT_FILE='predicted.jpg'
 LABELS_FILE='data/coco.names'
-CONFIG_FILE='cfg/yolov3.cfg'
-WEIGHTS_FILE='yolov3.weights'
+CONFIG_FILE='cfg/yolov3-tiny.cfg'
+WEIGHTS_FILE='yolov3-tiny.weights'
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--webcam', help="True/False", default=False)
@@ -59,7 +59,7 @@ def display_blob(blob):
 			cv2.imshow(str(n), imgb)
 
 def detect_objects(img, net, outputLayers):			
-	blob = cv2.dnn.blobFromImage(img, scalefactor=0.00392, size=(320, 320), mean=(0, 0, 0), swapRB=True, crop=False)
+	blob = cv2.dnn.blobFromImage(img, scalefactor=0.00392, size=(608, 608), mean=(0, 0, 0), swapRB=True, crop=False)
 	net.setInput(blob)
 	outputs = net.forward(outputLayers)
 	return blob, outputs
@@ -88,6 +88,7 @@ def get_box_dimensions(outputs, height, width):
 def draw_labels(boxes, confs, colors, class_ids, classes, img): 
 	indexes = cv2.dnn.NMSBoxes(boxes, confs, 0.5, 0.4)
 	font = cv2.FONT_HERSHEY_PLAIN
+	cout = 0
 	for i in range(len(boxes)):
 		if i in indexes:
 			x, y, w, h = boxes[i]
@@ -96,8 +97,10 @@ def draw_labels(boxes, confs, colors, class_ids, classes, img):
 			cv2.rectangle(img, (x,y), (x+w, y+h), color, 2)
 			text = "{}: {:.4f}".format(classes[class_ids[i]], confs[i])
 			cv2.putText(img, text, (x, y - 5), font, 1, color, 1)
+			print(text)
+			# cout = cout+1
 	cv2.imshow("Image", img)
-	cv2.imwrite("./screenshots/cerveja.jpg", img)
+	# cv2.imwrite("./screenshots/cerveja.jpg", img)
 
 def image_detect(img_path): 
 	model, classes, colors, output_layers = load_yolo()
