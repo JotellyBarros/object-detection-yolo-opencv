@@ -1,22 +1,35 @@
+import sys
+sys.path.remove('/opt/ros/kinetic/lib/python2.7/dist-packages') # in order to import cv2 under python3
+import cv2
+sys.path.append('/opt/ros/kinetic/lib/python2.7/dist-packages') # append back in order to import rospy
+
 import cv2
 import numpy as np 
 import argparse
 import time
 
+print(cv2.__version__)
+
+INPUT_FILE='images/cerveja.jpg'
+OUTPUT_FILE='predicted.jpg'
+LABELS_FILE='data/coco.names'
+CONFIG_FILE='cfg/yolov3.cfg'
+WEIGHTS_FILE='yolov3.weights'
+
 parser = argparse.ArgumentParser()
 parser.add_argument('--webcam', help="True/False", default=False)
 parser.add_argument('--play_video', help="Tue/False", default=False)
-parser.add_argument('--image', help="Tue/False", default=False)
+parser.add_argument('--image', help="Tue/False", default=True)
 parser.add_argument('--video_path', help="Path of video file", default="videos/car_on_road.mp4")
-parser.add_argument('--image_path', help="Path of image to detect objects", default="Images/bicycle.jpg")
+parser.add_argument('--image_path', help="Path of image to detect objects", default=INPUT_FILE)
 parser.add_argument('--verbose', help="To print statements", default=True)
 args = parser.parse_args()
 
 #Load yolo
 def load_yolo():
-	net = cv2.dnn.readNet("yolov3.weights", "yolov3.cfg")
+	net = cv2.dnn.readNet("yolov3.weights", "cfg/yolov3.cfg")
 	classes = []
-	with open("coco.names", "r") as f:
+	with open("data/coco.names", "r") as f:
 		classes = [line.strip() for line in f.readlines()]
 
 	layers_names = net.getLayerNames()
@@ -27,7 +40,7 @@ def load_yolo():
 def load_image(img_path):
 	# image loading
 	img = cv2.imread(img_path)
-	img = cv2.resize(img, None, fx=0.4, fy=0.4)
+	img = cv2.resize(img, None, fx=0.6, fy=0.6)
 	height, width, channels = img.shape
 	return img, height, width, channels
 
@@ -78,11 +91,13 @@ def draw_labels(boxes, confs, colors, class_ids, classes, img):
 	for i in range(len(boxes)):
 		if i in indexes:
 			x, y, w, h = boxes[i]
-			label = str(classes[class_ids[i]])
+			# label = str(classes[class_ids[i]])
 			color = colors[i]
 			cv2.rectangle(img, (x,y), (x+w, y+h), color, 2)
-			cv2.putText(img, label, (x, y - 5), font, 1, color, 1)
+			text = "{}: {:.4f}".format(classes[class_ids[i]], confs[i])
+			cv2.putText(img, text, (x, y - 5), font, 1, color, 1)
 	cv2.imshow("Image", img)
+	cv2.imwrite("./screenshots/cerveja.jpg", img)
 
 def image_detect(img_path): 
 	model, classes, colors, output_layers = load_yolo()
@@ -143,7 +158,7 @@ if __name__ == '__main__':
 		image_path = args.image_path
 		if args.verbose:
 			print("Opening "+image_path+" .... ")
-		image_detect(image_path)
+			image_detect(image_path)
 	
 
 	cv2.destroyAllWindows()
