@@ -1,8 +1,8 @@
 # YOLO object detection
-import sys
-sys.path.remove('/opt/ros/kinetic/lib/python2.7/dist-packages') # in order to import cv2 under python3
-import cv2
-sys.path.append('/opt/ros/kinetic/lib/python2.7/dist-packages') # append back in order to import rospy
+# import sys
+# sys.path.remove('/opt/ros/kinetic/lib/python2.7/dist-packages') # in order to import cv2 under python3
+# import cv2
+# sys.path.append('/opt/ros/kinetic/lib/python2.7/dist-packages') # append back in order to import rospy
 
 import cv2 as cv
 import numpy as np
@@ -13,13 +13,19 @@ img = None
 img0 = None
 outputs = None
 
+INPUT_FILE='/content/darknet/test/t/teste_copo_02_jpg'
+OUTPUT_FILE='predicted.jpg'
+LABELS_FILE='/content/darknet/data/coco.names' #'data/coco.names'
+CONFIG_FILE='/content/darknet/cfg/custom-yolov4-detector.cfg' #'cfg/yolov3-tiny.cfg'
+WEIGHTS_FILE='/content/darknet/backup/custom-yolov4-detector_best.weights' #'yolov3-tiny.weights'
+
 # Load names of classes and get random colors
-classes = open('./data/coco.names').read().strip().split('\n')
+classes = open(LABELS_FILE).read().strip().split('\n')
 np.random.seed(42)
 colors = np.random.randint(0, 255, size=(len(classes), 3), dtype='uint8')
 
 # Give the configuration and weight files for the model and load the network.
-net = cv.dnn.readNetFromDarknet('./cfg/yolov3.cfg', './yolov3.weights')
+net = cv.dnn.readNetFromDarknet(CONFIG_FILE, WEIGHTS_FILE)
 net.setPreferableBackend(cv.dnn.DNN_BACKEND_OPENCV)
 # net.setPreferableTarget(cv.dnn.DNN_TARGET_CPU)
 
@@ -31,7 +37,7 @@ def load_image(path):
     global img, img0, outputs, ln
 
     img0 = cv.imread(path)
-    img0 = cv2.resize(img0, None, fx=0.6, fy=0.6)
+    img0 = cv.resize(img0, None, fx=0.6, fy=0.6)
     img = img0.copy()
     
     blob = cv.dnn.blobFromImage(img, scalefactor=0.00392, size=(320, 320), mean=(0, 0, 0), swapRB=True, crop=False)
@@ -93,7 +99,7 @@ def trackbar(x):
 
 cv.namedWindow('window')
 cv.createTrackbar('confidence', 'window', 50, 100, trackbar)
-load_image('images/tipos-de-cerveja-1024x683.jpg')
+load_image(INPUT_FILE)
 # load_image('images/carnaval.jpg')
 
 cv.destroyAllWindows()
