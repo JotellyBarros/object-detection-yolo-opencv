@@ -1,7 +1,7 @@
-import sys
-sys.path.remove('/opt/ros/kinetic/lib/python2.7/dist-packages') # in order to import cv2 under python3
-import cv2
-sys.path.append('/opt/ros/kinetic/lib/python2.7/dist-packages') # append back in order to import rospy
+# import sys
+# sys.path.remove('/opt/ros/kinetic/lib/python2.7/dist-packages') # in order to import cv2 under python3
+# import cv2
+# sys.path.append('/opt/ros/kinetic/lib/python2.7/dist-packages') # append back in order to import rospy
 
 import cv2
 import numpy as np 
@@ -10,11 +10,11 @@ import time
 
 print(cv2.__version__)
 
-INPUT_FILE='images/dog.jpg'
+INPUT_FILE='/content/darknet/test/t/teste_copo_02_jpg'
 OUTPUT_FILE='predicted.jpg'
-LABELS_FILE='data/coco.names'
-CONFIG_FILE='cfg/yolov3-tiny.cfg'
-WEIGHTS_FILE='yolov3-tiny.weights'
+LABELS_FILE='/content/darknet/data/coco.names' #'data/coco.names'
+CONFIG_FILE='/content/darknet/cfg/custom-yolov4-detector.cfg' #'cfg/yolov3-tiny.cfg'
+WEIGHTS_FILE='/content/darknet/backup/custom-yolov4-detector_best.weights' #'yolov3-tiny.weights'
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--webcam', help="True/False", default=False)
@@ -27,9 +27,9 @@ args = parser.parse_args()
 
 #Load yolo
 def load_yolo():
-	net = cv2.dnn.readNet("yolov3.weights", "cfg/yolov3.cfg")
+	net = cv2.dnn.readNet(WEIGHTS_FILE, CONFIG_FILE)
 	classes = []
-	with open("data/coco.names", "r") as f:
+	with open(LABELS_FILE, "r") as f:
 		classes = [line.strip() for line in f.readlines()]
 
 	layers_names = net.getLayerNames()
