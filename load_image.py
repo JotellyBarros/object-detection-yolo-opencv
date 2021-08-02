@@ -51,5 +51,5 @@ class Load_image:
 
         for i in range(len(name_file.readlines())):
             if (name[i] == name_cup):
-                print("Name: " + name[i], "\nHeight: " + height[i], "\nWidth: " + width[i], "\nVolume: " + volume[i])
-                break
+                # print("Name: " + name[i], "\nHeight: " + height[i], "\nWidth: " + width[i], "\nVolume: " + volume[i])
+                return name[i], height[i], width[i], volume[i]

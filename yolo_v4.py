@@ -11,7 +11,7 @@ class Yolo_v4:
 
     def load_argument(self):
         """ load all arguments"""
-        input_file = '/content/object-detection-yolo-opencv/cup.png'
+        input_file = '/content/object-detection-yolo-opencv/picture_cup.png'
         output_file='None.jpg'
         labels_file='/content/darknet/data/obj.names' #'data/coco.names'
         config_file='/content/darknet/cfg/custom-yolov4-detector.cfg' #'cfg/yolov3-tiny.cfg'
@@ -43,7 +43,7 @@ class Yolo_v4:
                 boxes.append([*p0, int(w), int(h)])
                 confidences.append(float(confidence))
                 class_ids.append(class_id)
-                cv2.rectangle(img, p0, p1, (255, 255, 255), 1)
+                # cv2.rectangle(img, p0, p1, (255, 255, 255), 1)
 
         indices = cv2.dnn.NMSBoxes(boxes, confidences, conf, conf-0.1)
         if len(indices) > 0:
@@ -54,7 +54,7 @@ class Yolo_v4:
                 cv2.rectangle(img, (x, y), (x + w, y + h), color, 2)
                 label = str(classes[class_ids[i]])
                 text = "{}: {:.4f}".format(classes[class_ids[i]], confidences[i])
-                cv2.putText(img, text, (x, y - 5), cv2.FONT_HERSHEY_SIMPLEX, 0.5, color, 1)
+                cv2.putText(img, text, (x + 15, y - 5), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 1, cv2.LINE_AA)
                 print(text)
                 return label
 
