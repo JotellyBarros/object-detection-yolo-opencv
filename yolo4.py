@@ -1,9 +1,4 @@
 # YOLO object detection
-# import sys
-# sys.path.remove('/opt/ros/kinetic/lib/python2.7/dist-packages') # in order to import cv2 under python3
-# import cv2
-# sys.path.append('/opt/ros/kinetic/lib/python2.7/dist-packages') # append back in order to import rospy
-
 import cv2 as cv
 import numpy as np
 import time
@@ -13,11 +8,11 @@ img = None
 img0 = None
 outputs = None
 
-INPUT_FILE='/content/darknet/test/t/teste_copo_02_jpg'
+INPUT_FILE='/content/object-detection-yolo-opencv/cup.png'
 OUTPUT_FILE='predicted.jpg'
-LABELS_FILE='/content/darknet/data/coco.names' #'data/coco.names'
+LABELS_FILE='/content/darknet/data/obj.names' #'data/coco.names'
 CONFIG_FILE='/content/darknet/cfg/custom-yolov4-detector.cfg' #'cfg/yolov3-tiny.cfg'
-WEIGHTS_FILE='/content/darknet/backup/custom-yolov4-detector_best.weights' #'yolov3-tiny.weights'
+WEIGHTS_FILE='/content/darknet/backup/custom-yolov4-detector_final.weights' #'yolov3-tiny.weights'
 
 # Load names of classes and get random colors
 classes = open(LABELS_FILE).read().strip().split('\n')
@@ -25,7 +20,7 @@ np.random.seed(42)
 colors = np.random.randint(0, 255, size=(len(classes), 3), dtype='uint8')
 
 # Give the configuration and weight files for the model and load the network.
-net = cv.dnn.readNetFromDarknet(CONFIG_FILE, WEIGHTS_FILE)
+net = cv.dnn.readNet(CONFIG_FILE, WEIGHTS_FILE)
 net.setPreferableBackend(cv.dnn.DNN_BACKEND_OPENCV)
 # net.setPreferableTarget(cv.dnn.DNN_TARGET_CPU)
 
@@ -37,11 +32,11 @@ def load_image(path):
     global img, img0, outputs, ln
 
     img0 = cv.imread(path)
-    img0 = cv.resize(img0, None, fx=0.6, fy=0.6)
+    img0 = cv.resize(img0, None, fx=0.9, fy=0.9)
     img = img0.copy()
     
-    blob = cv.dnn.blobFromImage(img, scalefactor=0.00392, size=(320, 320), mean=(0, 0, 0), swapRB=True, crop=False)
-    # blob = cv.dnn.blobFromImage(img, 1/255.0, (416, 416), swapRB=True, crop=False)
+    # blob = cv.dnn.blobFromImage(img, scalefactor=0.00392, size=(320, 320), mean=(0, 0, 0), swapRB=True, crop=False)
+    blob = cv.dnn.blobFromImage(img, 1/255.0, (416, 416), swapRB=True, crop=False)
 
     net.setInput(blob)
     t0 = time.time()
@@ -88,6 +83,7 @@ def post_process(img, outputs, conf):
             cv.rectangle(img, (x, y), (x + w, y + h), color, 2)
             text = "{}: {:.4f}".format(classes[classIDs[i]], confidences[i])
             cv.putText(img, text, (x, y - 5), cv.FONT_HERSHEY_SIMPLEX, 0.5, color, 1)
+            print(text)
 
 def trackbar(x):
     global img

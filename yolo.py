@@ -1,8 +1,4 @@
-# import sys
-# sys.path.remove('/opt/ros/kinetic/lib/python2.7/dist-packages') # in order to import cv2 under python3
-# import cv2
-# sys.path.append('/opt/ros/kinetic/lib/python2.7/dist-packages') # append back in order to import rospy
-
+# YOLO object detection
 import cv2
 import numpy as np 
 import argparse
@@ -10,11 +6,14 @@ import time
 
 print(cv2.__version__)
 
-INPUT_FILE='/content/darknet/test/t/teste_copo_02_jpg'
+# ./darknet detector demo ./data/obj.data ./cfg/custom-yolov4-detector.cfg /content/darknet/backup/custom-yolov4-detector_final.weights -c 2
+
+
+INPUT_FILE='/content/object-detection-yolo-opencv/cup.png'
 OUTPUT_FILE='predicted.jpg'
-LABELS_FILE='/content/darknet/data/coco.names' #'data/coco.names'
+LABELS_FILE='/content/darknet/data/obj.names' #'data/coco.names'
 CONFIG_FILE='/content/darknet/cfg/custom-yolov4-detector.cfg' #'cfg/yolov3-tiny.cfg'
-WEIGHTS_FILE='/content/darknet/backup/custom-yolov4-detector_best.weights' #'yolov3-tiny.weights'
+WEIGHTS_FILE='/content/darknet/backup/custom-yolov4-detector_final.weights' #'yolov3-tiny.weights'
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--webcam', help="True/False", default=False)
@@ -40,13 +39,12 @@ def load_yolo():
 def load_image(img_path):
 	# image loading
 	img = cv2.imread(img_path)
-	img = cv2.resize(img, None, fx=0.6, fy=0.6)
+	img = cv2.resize(img, None, fx=0.9, fy=0.9)
 	height, width, channels = img.shape
 	return img, height, width, channels
 
 def start_webcam():
-	cap = cv2.VideoCapture(0)
-
+	cap = cv2.VideoCapture(2)
 	return cap
 
 
