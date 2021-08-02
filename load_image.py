@@ -13,11 +13,11 @@ class Load_image:
     def __init__(self, name='picture'):
         self.name = None
 
-    def capture_image(self, nFrames):
+    def capture_image(self, nFrames, camera):
         """Get capture of image"""
 
         file = "./picture_cup.png"
-        cap = cv2.VideoCapture(0)
+        cap = cv2.VideoCapture(camera)
 
         # Check if the webcam is opened correctly
         if not cap.isOpened():

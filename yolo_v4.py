@@ -10,6 +10,7 @@ class Yolo_v4:
     """Classe Yolo v4"""
 
     def load_argument(self):
+        """ load all arguments"""
         input_file = '/content/object-detection-yolo-opencv/cup.png'
         output_file='None.jpg'
         labels_file='/content/darknet/data/obj.names' #'data/coco.names'
@@ -18,88 +19,77 @@ class Yolo_v4:
 
         return input_file, output_file, labels_file, config_file, weights_file
 
-    def load_yolo(self, config_file, weights_file, labels_file):
-        net = cv2.dnn.readNet(config_file, weights_file)
-        classes = []
-        with open(labels_file, "r") as f:
-            classes = [line.strip() for line in f.readlines()]
+    def post_process(self, labels_file, img, outputs, conf):
+        """ Load names of classes and get random colors """
 
-        layers_names = net.getLayerNames()
-        output_layers = [layers_names[i[0]-1] for i in net.getUnconnectedOutLayers()]
-        colors = np.random.uniform(0, 255, size=(len(classes), 3))
-        return net, classes, colors, output_layers
+        classes = open(labels_file).read().strip().split('\n')
+        np.random.seed(42)
+        colors = np.random.randint(0, 255, size=(len(classes), 3), dtype='uint8')
 
-    def load_image(self, input_file):
-        img = cv2.imread(input_file)
-        img = cv2.resize(img, None, fx=0.9, fy=0.9)
-        height, width, channels = img.shape
-        return img, height, width, channels
+        H, W = img.shape[:2]
 
-    def detect_objects(self, img, net, outputLayers):			
-        blob = cv2.dnn.blobFromImage(img, scalefactor=0.00392, size=(608, 608), mean=(0, 0, 0), swapRB=True, crop=False)
-        net.setInput(blob)
-        outputs = net.forward(outputLayers)
-        return blob, outputs
-    
-    def get_box_dimensions(self, outputs, height, width):
         boxes = []
-        confs = []
+        confidences = []
         class_ids = []
+
         for output in outputs:
-            for detect in output:
-                scores = detect[5:]
-                class_id = np.argmax(scores)
-                conf = scores[class_id]
-                if conf > 0.3:
-                    center_x = int(detect[0] * width)
-                    center_y = int(detect[1] * height)
-                    w = int(detect[2] * width)
-                    h = int(detect[3] * height)
-                    x = int(center_x - w/2)
-                    y = int(center_y - h / 2)
-                    boxes.append([x, y, w, h])
-                    confs.append(float(conf))
-                    class_ids.append(class_id)
-        return boxes, confs, class_ids
+            scores = output[5:]
+            class_id = np.argmax(scores)
+            confidence = scores[class_id]
+            if confidence > conf:
+                x, y, w, h = output[:4] * np.array([W, H, W, H])
+                p0 = int(x - w//2), int(y - h//2)
+                p1 = int(x + w//2), int(y + h//2)
+                boxes.append([*p0, int(w), int(h)])
+                confidences.append(float(confidence))
+                class_ids.append(class_id)
+                cv2.rectangle(img, p0, p1, (255, 255, 255), 1)
 
-    def draw_labels(self, boxes, confs, colors, class_ids, classes, img): 
-        indexes = cv2.dnn.NMSBoxes(boxes, confs, 0.5, 0.4)
-        font = cv2.FONT_HERSHEY_PLAIN
-        for i in range(len(boxes)):
-            if i in indexes:
-                x, y, w, h = boxes[i]
+        indices = cv2.dnn.NMSBoxes(boxes, confidences, conf, conf-0.1)
+        if len(indices) > 0:
+            for i in indices.flatten():
+                (x, y) = (boxes[i][0], boxes[i][1])
+                (w, h) = (boxes[i][2], boxes[i][3])
+                color = [int(c) for c in colors[class_ids[i]]]
+                cv2.rectangle(img, (x, y), (x + w, y + h), color, 2)
                 label = str(classes[class_ids[i]])
-                color = colors[i]
-                cv2.rectangle(img, (x,y), (x+w, y+h), color, 2)
-                text = "{}: {:.4f}".format(classes[class_ids[i]], confs[i])
-                cv2.putText(img, text, (x, y - 5), font, 1, color, 1)
-                print(label)
-        cv2.imshow("Image", img)
-        return label
+                text = "{}: {:.4f}".format(classes[class_ids[i]], confidences[i])
+                cv2.putText(img, text, (x, y - 5), cv2.FONT_HERSHEY_SIMPLEX, 0.5, color, 1)
+                print(text)
+                return label
 
-    def image_detect(self, input_file, output_file, labels_file, config_file, weights_file):
-        model, classes, colors, output_layers = self.load_yolo(config_file, weights_file, labels_file)
-        image, height, width, channels = self.load_image(input_file)
-        blob, outputs = self.detect_objects(image, model, output_layers)
-        boxes, confs, class_ids = self.get_box_dimensions(outputs, height, width)
-        name_label = self.draw_labels(boxes, confs, colors, class_ids, classes, image)
+    def load_image(self, input_file, output_file, labels_file, config_file, weights_file):
+        global img, img0, outputs, ln
+
+        # Give the configuration and weight files for the model and load the network.
+        net = cv2.dnn.readNet(config_file, weights_file)
+        net.setPreferableBackend(cv2.dnn.DNN_BACKEND_OPENCV)
+
+        # determine the output layer
+        ln = net.getLayerNames()
+        ln = [ln[i[0] - 1] for i in net.getUnconnectedOutLayers()]
+
+        img0 = cv2.imread(input_file)
+        img0 = cv2.resize(img0, None, fx=0.9, fy=0.9)
+        img = img0.copy()
         
-        while True:
-            key = cv2.waitKey(1)
-            if key == 27:
-                break
-            
+        blob = cv2.dnn.blobFromImage(img, scalefactor=0.00392, size=(416, 416), mean=(0, 0, 0), swapRB=True, crop=False)
+
+        net.setInput(blob)
+        t0 = time.time()
+        outputs = net.forward(ln)
+        t = time.time() - t0
+
+        outputs = np.vstack(outputs)
+
+        name_label = self.post_process(labels_file, img, outputs, 0.5)
+        cv2.imshow('Detection window',  img)
+        cv2.waitKey(0)
         return name_label
 
     def yolo_object_detection(self):
-        print("Yolo object detection loading...")
-        
+        """ Yolo object detection loading """
+
         input_file, output_file, labels_file, config_file, weights_file = self.load_argument()
-
-        # print("input_file:  "  + input_file)
-        # print("labels_file: "  + labels_file)
-        # print("config_file: "  + config_file)
-        # print("weights_file: " + weights_file)
-
-        name_label = self.image_detect(input_file, output_file, labels_file, config_file, weights_file)
+        name_label = self.load_image(input_file, output_file, labels_file, config_file, weights_file)
         return name_label
