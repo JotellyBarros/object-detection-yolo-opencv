@@ -84,7 +84,7 @@ class Yolo_v4:
 
         name_label = self.post_process(labels_file, img, outputs, 0.5)
         cv2.imshow('Detection window',  img)
-        cv2.waitKey(0)
+        # cv2.waitKey(0)
         return name_label
 
     def yolo_object_detection(self):
