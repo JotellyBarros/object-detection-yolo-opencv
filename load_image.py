@@ -44,7 +44,7 @@ class Load_image:
         """Get info of image"""
 
         name_file = open('data_cup.csv')
-        name,height,width,volume=np.loadtxt('data_cup.csv',
+        name, height, width, volume=np.loadtxt('data_cup.csv',
                                     delimiter=';',
                                     unpack=True,
                                     dtype='str')
@@ -52,4 +52,6 @@ class Load_image:
         for i in range(len(name_file.readlines())):
             if (name[i] == name_cup):
                 # print("Name: " + name[i], "\nHeight: " + height[i], "\nWidth: " + width[i], "\nVolume: " + volume[i])
-                return name[i], height[i], width[i], volume[i]
+                return name[i], float(height[i]), float(width[i]), int(volume[i])
+
+

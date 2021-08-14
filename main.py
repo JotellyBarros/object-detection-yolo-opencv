@@ -17,7 +17,6 @@ if __name__ == "__main__":
     name_cup_chopp = picture_yolo.yolo_object_detection()
     name, height, width, volume = picture.data_load_info(name_cup_chopp)
     filter_mask.capture_image(name, height, width, volume, camera) # camera
-    filter_mask.capture_image("name", "height", "width", "volume", 2) # camera
     
     # Print the docstring of multiply function
     # print(picture.capture_image.__doc__)
