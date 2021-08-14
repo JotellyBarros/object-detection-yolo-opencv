@@ -119,15 +119,12 @@ class Mask_beer:
             # Scans all found contours
             if ((len(cntbeer) > 0) and (beerServed == False)):
                 beerServed = self.SweepContours("Beer", frame, cntbeer, height, volume, 0, 255, 0)
-                print(beerServed)
                 cv2.imshow(name, frame)
    
             if (len(cntspume) > 0) and (spumeServed == False):
                 spumeServed = self.SweepContours("Spume", frame, cntspume, height, volume, 0, 255, 0)
+                cv2.imshow(name, frame)
             # -----------------------------------------------------------
-
-            # Displaying the image
-            # cv2.imshow(name, frame)
 
             key = cv2.waitKey(1) & 0xFF
             if key == ord("q"):

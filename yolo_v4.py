@@ -13,9 +13,9 @@ class Yolo_v4:
         """ load all arguments"""
         input_file = '/content/object-detection-yolo-opencv/picture_cup.png'
         output_file='None.jpg'
-        labels_file='/content/darknet/data/obj.names' #'data/coco.names'
-        config_file='/content/darknet/cfg/custom-yolov4-detector.cfg' #'cfg/yolov3-tiny.cfg'
-        weights_file='/content/darknet/backup/custom-yolov4-detector_final.weights' #'yolov3-tiny.weights'
+        labels_file='/content/object-detection-yolo-opencv/data/obj.names' #'data/coco.names'
+        config_file='/content/object-detection-yolo-opencv/cfg/custom-yolov4-detector.cfg' #'cfg/yolov3-tiny.cfg'
+        weights_file='/content/object-detection-yolo-opencv/weight/custom-yolov4-detector_final.weights' #'yolov3-tiny.weights'
 
         return input_file, output_file, labels_file, config_file, weights_file
 
